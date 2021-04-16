@@ -216,26 +216,30 @@ def getBiggestFeat(X: np.ndarray, y: np.ndarray, deb: int) -> (int, float):
     f_num = 0.0
     f_now = 0.0
 
-    if len(X) <= 1:
-        return (0, 0)
+    if len(X) <= 1: return (0, 0)
 
     n = len(y)
     m = len(X[0])
+
+    biggest = []
+    smllest = []
+    sums = []
+
     for i in range(m):
-        now = 0
-        sum = 0
-        cnt = 0
-        for j in range(n):
-            # if (y[j] == 1):
-                # now += X[j][i]
-                # cnt += 1
-            sum += X[j][i]
-        
-        # sum = sum / n
-        # now = now / n
-        # now = (sum + now) / 2.0
-        
-        now = sum / n
+        sums.append(0)
+        biggest.append(X[0][i])
+        smllest.append(X[0][i])
+
+    for i in range(1, n):
+        for j in range(m):
+            sums[j] += X[i][j]
+            biggest[j] = max(biggest[j], X[i][j])
+            smllest[j] = max(smllest[j], X[i][j])
+
+    for i in range(m):
+        # sums[i] -= biggest[i]
+        # sums[i] -= smllest[i]
+        now = sums[i] / (n)
 
         prt = calPurity(X, y, i, now)
         if prt > f_now:
@@ -274,7 +278,7 @@ def dfs(X: np.ndarray, y: np.ndarray, nod: Node, dep: int):
     
     nod.putChild(lefChd, rigChd)
 
-    if (dep == 0): 
+    if (dep == 1): 
         lefChd.calResult(lef_y)
         rigChd.calResult(rig_y)
         return
@@ -283,7 +287,7 @@ def dfs(X: np.ndarray, y: np.ndarray, nod: Node, dep: int):
     else:
         dfs(lef_x, lef_y, lefChd, dep - 1)
         
-    if (len(rig_x) <= 0): rigChd.calResult(rig_y)
+    if (len(rig_x) <= 1): rigChd.calResult(rig_y)
     else:
         dfs(rig_x, rig_y, rigChd, dep - 1)
 
@@ -292,7 +296,7 @@ def dfs(X: np.ndarray, y: np.ndarray, nod: Node, dep: int):
 # TODO: you can define or import something here (optional)
 
 class Model:
-    num_depth = 8
+    num_depth = 10
     num_features = 0
     num_classes = 0
     rot = None
@@ -327,9 +331,7 @@ class Model:
     Returns:
         np.ndarray : the predicted integer outputs, shape: (num_inputs,).
     """
-    def predict(self, X: np.ndarray) -> np.ndarray: # TODO: implement your prediction algorithm here
-        # p = np.random.randint(0, self.num_classes, size=X.shape[0]) # (delete this)
-        
+    def predict(self, X: np.ndarray) -> np.ndarray: # TODO: implement your prediction algorithm here      
         p = []
         n = X.shape[0]
         for i in X:
